@@ -19,7 +19,7 @@
 TEST(TextEncoder, encode)
 {
   auto encoder = transcriber::QFormerTextEncoder(false);
-  encoder.encode("Hello World");
+  std::cout << encoder.encode("Hello World") << std::endl;
 }
 
 int main(int argc, char ** argv)

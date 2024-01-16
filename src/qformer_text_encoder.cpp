@@ -29,8 +29,11 @@ QFormerTextEncoder::QFormerTextEncoder(const bool is_cuda)
 
 torch::Tensor QFormerTextEncoder::encode(const std::string & text)
 {
-  const auto tokens = tokenize(text);
-  return model_.forward({tokens}).toTensor();
+  return model_
+    .forward(
+      {tokenize(text).unsqueeze(0),
+       torch::ones({1, static_cast<int64_t>(getNumberOfTokens(text))}, at::kInt)})
+    .toTensor();
 }
 
 torch::Tensor QFormerTextEncoder::tokenize(const std::string & text) const
@@ -46,5 +49,10 @@ torch::Tensor QFormerTextEncoder::tokenize(const std::string & text) const
   return torch_util::to_torch_tensor(
     torch_msgs::build<torch_msgs::msg::INT64Tensor>().is_cuda(is_cuda).data(token_ids).shape(
       {static_cast<int64_t>(token_ids.size())}));
+}
+
+size_t QFormerTextEncoder::getNumberOfTokens(const std::string & text) const
+{
+  return tokenizer_.convertTokensToIds(tokenizer_.tokenize(text)).size();
 }
 }  // namespace transcriber

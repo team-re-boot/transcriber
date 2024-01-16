@@ -32,6 +32,7 @@ private:
   const bert_tokenizer::FullTokenizer tokenizer_;
   torch::jit::script::Module model_;
   torch::Tensor tokenize(const std::string & text) const;
+  size_t getNumberOfTokens(const std::string & text) const;
 };
 }  // namespace transcriber
 
