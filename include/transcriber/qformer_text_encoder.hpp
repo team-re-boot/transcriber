@@ -24,11 +24,13 @@ namespace transcriber
 class QFormerTextEncoder
 {
 public:
-  QFormerTextEncoder();
+  explicit QFormerTextEncoder(const bool is_cuda);
+  const bool is_cuda;
 
 private:
   const bert_tokenizer::FullTokenizer tokenizer_;
   const torch::jit::script::Module model_;
+  torch::Tensor tokenize(const std::string & text) const;
 };
 }  // namespace transcriber
 

@@ -13,7 +13,7 @@
   <depend>libtorch_vendor</depend>
   <depend>bert_tokenizer</depend>
   <depend>torch_msgs</depend>
-  <depend>torch_utils</depend>
+  <depend>torch_util</depend>
   <depend>rclcpp</depend>
   <depend>ament_index_cpp</depend>
 

@@ -13,15 +13,32 @@
 // limitations under the License.
 
 #include <ament_index_cpp/get_package_share_directory.hpp>
+#include <torch_util/type_adapter.hpp>
 #include <transcriber/qformer_text_encoder.hpp>
 
 namespace transcriber
 {
-QFormerTextEncoder::QFormerTextEncoder()
-: tokenizer_(get_vocab_path(bert_tokenizer::PretrainedVocab::BERT_BASE_UNCASED)),
+QFormerTextEncoder::QFormerTextEncoder(const bool is_cuda)
+: is_cuda(is_cuda),
+  tokenizer_(get_vocab_path(bert_tokenizer::PretrainedVocab::BERT_BASE_UNCASED)),
   model_(torch::jit::load(
     ament_index_cpp::get_package_share_directory("transcriber") +
     "/models/qformer_text_encoder.pt"))
 {
+}
+
+torch::Tensor QFormerTextEncoder::tokenize(const std::string & text) const
+{
+  const auto token_ids = [&]() {
+    std::vector<int64_t> ret;
+    const auto ids = tokenizer_.convertTokensToIds(tokenizer_.tokenize(text));
+    std::transform(ids.begin(), ids.end(), std::back_inserter(ret), [](int id) {
+      return static_cast<int64_t>(id);
+    });
+    return ret;
+  }();
+  return torch_util::to_torch_tensor(
+    torch_msgs::build<torch_msgs::msg::INT64Tensor>().is_cuda(is_cuda).data(token_ids).shape(
+      {static_cast<int64_t>(token_ids.size())}));
 }
 }  // namespace transcriber
