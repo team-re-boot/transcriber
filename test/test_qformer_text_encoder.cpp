@@ -16,7 +16,11 @@
 
 #include <transcriber/qformer_text_encoder.hpp>
 
-TEST(TextEncoder, encode) { const auto encoder = transcriber::QFormerTextEncoder(false); }
+TEST(TextEncoder, encode)
+{
+  auto encoder = transcriber::QFormerTextEncoder(false);
+  encoder.encode("Hello World");
+}
 
 int main(int argc, char ** argv)
 {

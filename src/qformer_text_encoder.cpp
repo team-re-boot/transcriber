@@ -22,9 +22,15 @@ QFormerTextEncoder::QFormerTextEncoder(const bool is_cuda)
 : is_cuda(is_cuda),
   tokenizer_(get_vocab_path(bert_tokenizer::PretrainedVocab::BERT_BASE_UNCASED)),
   model_(torch::jit::load(
-    ament_index_cpp::get_package_share_directory("transcriber") +
-    "/models/qformer_text_encoder.pt"))
+    ament_index_cpp::get_package_share_directory("transcriber") + "/models/qformer_text_encoder.pt",
+    (is_cuda && torch::cuda::is_available()) ? torch::kCUDA : torch::kCPU))
 {
+}
+
+torch::Tensor QFormerTextEncoder::encode(const std::string & text)
+{
+  const auto tokens = tokenize(text);
+  return model_.forward({tokens}).toTensor();
 }
 
 torch::Tensor QFormerTextEncoder::tokenize(const std::string & text) const

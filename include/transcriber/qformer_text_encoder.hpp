@@ -26,10 +26,11 @@ class QFormerTextEncoder
 public:
   explicit QFormerTextEncoder(const bool is_cuda);
   const bool is_cuda;
+  torch::Tensor encode(const std::string & text);
 
 private:
   const bert_tokenizer::FullTokenizer tokenizer_;
-  const torch::jit::script::Module model_;
+  torch::jit::script::Module model_;
   torch::Tensor tokenize(const std::string & text) const;
 };
 }  // namespace transcriber
