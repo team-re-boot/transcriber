@@ -27,7 +27,7 @@ QFormerTextEncoder::QFormerTextEncoder(const bool is_cuda)
 {
 }
 
-torch::Tensor QFormerTextEncoder::encode(const std::string & text)
+torch::Tensor QFormerTextEncoder::encode(const std::string & text) const
 {
   return model_
     .forward(

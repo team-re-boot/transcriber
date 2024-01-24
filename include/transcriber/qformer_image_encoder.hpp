@@ -12,28 +12,23 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef TRANSCRIBER__QFORMER_TEXT_ENCODER_COMPONENT_HPP_
-#define TRANSCRIBER__QFORMER_TEXT_ENCODER_COMPONENT_HPP_
+#ifndef TRANSCRIBER__QFORMER_IMAGE_ENCODER_COMPONENT_HPP_
+#define TRANSCRIBER__QFORMER_IMAGE_ENCODER_COMPONENT_HPP_
 
 #include <torch/script.h>
 
-#include <bert_tokenizer/tokenizer.hpp>
-
 namespace transcriber
 {
-class QFormerTextEncoder
+class QFormerImageEncoder
 {
 public:
-  explicit QFormerTextEncoder(const bool is_cuda);
+  explicit QFormerImageEncoder(const bool is_cuda);
   const bool is_cuda;
-  torch::Tensor encode(const std::string & text) const;
+  torch::Tensor encode(const torch::Tensor & image) const;
 
 private:
-  const bert_tokenizer::FullTokenizer tokenizer_;
   mutable torch::jit::script::Module model_;
-  torch::Tensor tokenize(const std::string & text) const;
-  size_t getNumberOfTokens(const std::string & text) const;
 };
 }  // namespace transcriber
 
-#endif  // TRANSCRIBER__QFORMER_TEXT_ENCODER_COMPONENT_HPP_
+#endif  // TRANSCRIBER__QFORMER_IMAGE_ENCODER_COMPONENT_HPP_

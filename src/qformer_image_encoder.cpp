@@ -12,28 +12,26 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef TRANSCRIBER__QFORMER_TEXT_ENCODER_COMPONENT_HPP_
-#define TRANSCRIBER__QFORMER_TEXT_ENCODER_COMPONENT_HPP_
-
-#include <torch/script.h>
-
-#include <bert_tokenizer/tokenizer.hpp>
+#include <ament_index_cpp/get_package_share_directory.hpp>
+#include <torch_util/type_adapter.hpp>
+#include <transcriber/qformer_image_encoder.hpp>
 
 namespace transcriber
 {
-class QFormerTextEncoder
+QFormerImageEncoder::QFormerImageEncoder(const bool is_cuda)
+: is_cuda(is_cuda),
+  model_(torch::jit::load(
+    ament_index_cpp::get_package_share_directory("transcriber") +
+      "/models/qformer_image_encoder.pt",
+    (is_cuda && torch::cuda::is_available()) ? torch::kCUDA : torch::kCPU))
 {
-public:
-  explicit QFormerTextEncoder(const bool is_cuda);
-  const bool is_cuda;
-  torch::Tensor encode(const std::string & text) const;
+}
 
-private:
-  const bert_tokenizer::FullTokenizer tokenizer_;
-  mutable torch::jit::script::Module model_;
-  torch::Tensor tokenize(const std::string & text) const;
-  size_t getNumberOfTokens(const std::string & text) const;
-};
+torch::Tensor QFormerImageEncoder::encode(const torch::Tensor & image) const
+{
+  return torch::clamp(
+    [&]() { return image.dtype() == torch::kFloat32 ? image : image.to(torch::kFloat32); }() /
+      255.0,
+    0.0, 1.0);
+}
 }  // namespace transcriber
-
-#endif  // TRANSCRIBER__QFORMER_TEXT_ENCODER_COMPONENT_HPP_
