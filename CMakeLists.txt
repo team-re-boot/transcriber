@@ -18,7 +18,7 @@ file(DOWNLOAD
   https://huggingface.co/hakuturu583/torchscript_lavis/resolve/main/qformer_image_encoder.pt
   qformer_image_encoder.pt
   SHOW_PROGRESS
-  EXPECTED_MD5 72c497ffff6a9b7a85dd83a70b8c9d29)
+  EXPECTED_MD5 3d7452ce7565a028e81a3eb2dfcd0ef8)
 
 file(DOWNLOAD
   https://huggingface.co/hakuturu583/torchscript_lavis/resolve/main/qformer_text_encoder.pt
@@ -31,12 +31,16 @@ install(
   DESTINATION share/${PROJECT_NAME}/models
 )
 
+install(DIRECTORY data
+  DESTINATION share/${PROJECT_NAME}
+)
+
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
   ament_lint_auto_find_test_dependencies()
   find_package(ament_cmake_gtest REQUIRED)
-  ament_add_gtest(test_qformer_text_encoder test/test_qformer_text_encoder.cpp)
-  target_link_libraries(test_qformer_text_encoder ${PROJECT_NAME})
+  ament_add_gtest(test_qformer_encoder test/test_qformer_encoder.cpp)
+  target_link_libraries(test_qformer_encoder ${PROJECT_NAME})
 endif()
 
 ament_auto_package()

@@ -18,21 +18,27 @@
 #include <torch/script.h>
 
 #include <bert_tokenizer/tokenizer.hpp>
+#include <rclcpp/rclcpp.hpp>
+#include <torch_util/type_adapter.hpp>
+#include <transcriber/tensor_cache.hpp>
 
 namespace transcriber
 {
 class QFormerTextEncoder
 {
 public:
-  explicit QFormerTextEncoder(const bool is_cuda);
+  explicit QFormerTextEncoder(const bool is_cuda, const rclcpp::Logger & logger);
   const bool is_cuda;
   torch::Tensor encode(const std::string & text) const;
+  void clearCache();
 
 private:
   const bert_tokenizer::FullTokenizer tokenizer_;
   mutable torch::jit::script::Module model_;
   torch::Tensor tokenize(const std::string & text) const;
   size_t getNumberOfTokens(const std::string & text) const;
+  mutable TensorCache<std::string> cache_;
+  const rclcpp::Logger logger_;
 };
 }  // namespace transcriber
 

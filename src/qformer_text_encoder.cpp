@@ -13,18 +13,21 @@
 // limitations under the License.
 
 #include <ament_index_cpp/get_package_share_directory.hpp>
-#include <torch_util/type_adapter.hpp>
 #include <transcriber/qformer_text_encoder.hpp>
 
 namespace transcriber
 {
-QFormerTextEncoder::QFormerTextEncoder(const bool is_cuda)
+QFormerTextEncoder::QFormerTextEncoder(const bool is_cuda, const rclcpp::Logger & logger)
 : is_cuda(is_cuda),
   tokenizer_(get_vocab_path(bert_tokenizer::PretrainedVocab::BERT_BASE_UNCASED)),
   model_(torch::jit::load(
     ament_index_cpp::get_package_share_directory("transcriber") + "/models/qformer_text_encoder.pt",
-    (is_cuda && torch::cuda::is_available()) ? torch::kCUDA : torch::kCPU))
+    (is_cuda && torch::cuda::is_available()) ? torch::kCUDA : torch::kCPU)),
+  cache_(512),
+  logger_(logger)
 {
+  model_.eval();
+  model_ = torch::jit::optimize_for_inference(model_);
 }
 
 torch::Tensor QFormerTextEncoder::encode(const std::string & text) const

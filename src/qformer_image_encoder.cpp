@@ -13,25 +13,42 @@
 // limitations under the License.
 
 #include <ament_index_cpp/get_package_share_directory.hpp>
-#include <torch_util/type_adapter.hpp>
 #include <transcriber/qformer_image_encoder.hpp>
 
 namespace transcriber
 {
-QFormerImageEncoder::QFormerImageEncoder(const bool is_cuda)
+QFormerImageEncoder::QFormerImageEncoder(const bool is_cuda, const rclcpp::Logger & logger)
 : is_cuda(is_cuda),
-  model_(torch::jit::load(
+  model_((torch::jit::load(
     ament_index_cpp::get_package_share_directory("transcriber") +
       "/models/qformer_image_encoder.pt",
-    (is_cuda && torch::cuda::is_available()) ? torch::kCUDA : torch::kCPU))
+    (is_cuda && torch::cuda::is_available()) ? torch::kCUDA : torch::kCPU))),
+  logger_(logger)
 {
+  model_.eval();
+  model_ = torch::jit::optimize_for_inference(model_);
 }
 
-torch::Tensor QFormerImageEncoder::encode(const torch::Tensor & image) const
+torch::Tensor QFormerImageEncoder::encode(const cv::Mat & image) const
 {
-  return torch::clamp(
-    [&]() { return image.dtype() == torch::kFloat32 ? image : image.to(torch::kFloat32); }() /
+  const auto begin = std::chrono::system_clock::now();
+  cv::Mat image_resized;
+  cv::resize(image, image_resized, cv::Size(224, 224), cv::INTER_LINEAR);
+  /// @todo implement https://pytorch.org/vision/main/generated/torchvision.transforms.Normalize.html
+
+  const auto input_tensor = torch::clamp(
+    [&](const auto image) {
+      return image.dtype() == torch::kFloat32 ? image : image.to(torch::kFloat32);
+    }(torch_util::to_torch_tensor(image_resized)) /
       255.0,
     0.0, 1.0);
+  // std::cout << input_tensor.sizes()[0] << std::endl;
+  const auto output = model_.forward({input_tensor}).toTensor();
+  const auto end = std::chrono::system_clock::now();
+  RCLCPP_INFO_STREAM(
+    logger_,
+    "Elapsed " << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count()
+               << " ms for running image encoder.");
+  return output;
 }
 }  // namespace transcriber

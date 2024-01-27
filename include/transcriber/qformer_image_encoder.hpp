@@ -17,17 +17,21 @@
 
 #include <torch/script.h>
 
+#include <rclcpp/rclcpp.hpp>
+#include <torch_util/type_adapter.hpp>
+
 namespace transcriber
 {
 class QFormerImageEncoder
 {
 public:
-  explicit QFormerImageEncoder(const bool is_cuda);
+  explicit QFormerImageEncoder(const bool is_cuda, const rclcpp::Logger & logger);
   const bool is_cuda;
-  torch::Tensor encode(const torch::Tensor & image) const;
+  torch::Tensor encode(const cv::Mat & image) const;
 
 private:
   mutable torch::jit::script::Module model_;
+  const rclcpp::Logger logger_;
 };
 }  // namespace transcriber
 
