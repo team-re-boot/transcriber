@@ -15,6 +15,7 @@
   <depend>torch_msgs</depend>
   <depend>torch_util</depend>
   <depend>rclcpp</depend>
+  <!-- <depend>tbb</depend> -->
   <depend>ament_index_cpp</depend>
 
   <test_depend>ament_lint_auto</test_depend>

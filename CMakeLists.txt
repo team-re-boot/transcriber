@@ -7,12 +7,16 @@ endif()
 
 # find dependencies
 find_package(ament_cmake_auto REQUIRED)
+find_package(TBB REQUIRED)
 ament_auto_find_build_dependencies()
 
 ament_auto_add_library(${PROJECT_NAME} SHARED
   src/qformer_text_encoder.cpp
   src/qformer_image_encoder.cpp
 )
+# target_link_libraries(${PROJECT_NAME}
+#   tbb
+# )
 
 file(DOWNLOAD
   https://huggingface.co/hakuturu583/torchscript_lavis/resolve/main/qformer_image_encoder.pt

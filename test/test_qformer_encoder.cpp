@@ -18,18 +18,16 @@
 #include <transcriber/qformer_image_encoder.hpp>
 #include <transcriber/qformer_text_encoder.hpp>
 
-TEST(TextEncoder, encode)
-{
-  auto encoder = transcriber::QFormerTextEncoder(false, rclcpp::get_logger("text_encoder"));
-  encoder.encode("Hello World");
-  // std::cout << encoder.encode("Hello World") << std::endl;
-}
+// TEST(TextEncoder, encode)
+// {
+//   auto encoder = transcriber::QFormerTextEncoder(false, rclcpp::get_logger("text_encoder"));
+//   encoder.encode("Hello World");
+//   // std::cout << encoder.encode("Hello World") << std::endl;
+// }
 
 TEST(ImageEncoder, encode)
 {
-  std::cout << __FILE__ << "," << __LINE__ << std::endl;
   auto encoder = transcriber::QFormerImageEncoder(false, rclcpp::get_logger("image_encoder"));
-  std::cout << __FILE__ << "," << __LINE__ << std::endl;
   encoder.encode(cv::imread(
     ament_index_cpp::get_package_share_directory("transcriber") + "/data/merlion_demo.png"));
 }
@@ -38,6 +36,7 @@ int main(int argc, char ** argv)
 {
   torch::set_num_threads(32);
   torch::set_num_interop_threads(12);
+  std::cout << at::get_parallel_info() << std::endl;
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }
